@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { STUDENTS, type Student } from "@/lib/students";
 import { ADMIN_PIN } from "@/lib/config";
 import {
@@ -202,7 +203,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Stats pill */}
+          {/* Stats pill + Practice link */}
           <div className="flex items-center gap-2 text-sm">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -210,120 +211,104 @@ function Dashboard() {
             </span>
             <span className="text-slate-500">/</span>
             <span className="text-slate-400 font-medium">{STUDENTS.length}</span>
+
+            <Link
+              href="/practice"
+              className="btn ml-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 transition-colors gap-1"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Practice
+            </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-5 space-y-5 pb-28">
-        {/* ── Waiting Section ── */}
-        <section className="animate-fade-in">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <main className="max-w-2xl mx-auto px-4 py-5 space-y-4 pb-28">
+        {/* Search */}
+        <div className="relative mb-2 animate-fade-in">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search by name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              Waiting
-              <span className="text-slate-500 font-normal">({waitingStudents.length})</span>
-            </h2>
-          </div>
+            </button>
+          )}
+        </div>
 
-          {/* Search */}
-          <div className="relative mb-3">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              id="search-input"
-              type="text"
-              placeholder="Search by name…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Waiting list */}
-          <div className="space-y-2">
-            {filteredWaiting.length === 0 ? (
-              <div className="text-center py-8 text-slate-500 text-sm">
-                {waitingStudents.length === 0
-                  ? "🎉 Everyone's here!"
-                  : "No matching students."}
+        {/* Unified List */}
+        <div className="space-y-2 animate-fade-in">
+          {/* Arrived Students (Top) */}
+          {arrivedStudents.map((a, i) => (
+            <div
+              key={a.studentId}
+              className="glass-card px-4 py-3 flex items-center gap-3 animate-slide-in"
+              style={{ animationDelay: `${Math.min(i, 10) * 0.03}s` }}
+            >
+              {/* Order badge */}
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                {a.order}
               </div>
-            ) : (
-              filteredWaiting.map((student) => (
-                <WaitingCard
-                  key={student.id}
-                  student={student}
-                  onCheckIn={handleCheckIn}
-                />
-              ))
-            )}
-          </div>
-        </section>
 
-        {/* ── Arrived Section ── */}
-        <section className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Arrived
-              <span className="text-slate-500 font-normal">({arrivedStudents.length})</span>
-            </h2>
-          </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm truncate">
+                  {a.student?.name ?? "Unknown"}
+                </p>
+                <p className="text-slate-500 text-xs">
+                  {a.student?.phone}
+                </p>
+              </div>
 
-          {arrivedStudents.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 text-sm glass-card">
-              No check-ins yet today.
+              {/* Time */}
+              <span className="text-xs text-emerald-400/80 font-mono flex-shrink-0">
+                {new Date(a.time).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </span>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {arrivedStudents.map((a, i) => (
-                <div
-                  key={a.studentId}
-                  className="glass-card px-4 py-3 flex items-center gap-3 animate-slide-in"
-                  style={{ animationDelay: `${i * 0.03}s` }}
-                >
-                  {/* Order badge */}
-                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm font-bold">
-                    {a.order}
-                  </div>
+          ))}
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium text-sm truncate">
-                      {a.student?.name ?? "Unknown"}
-                    </p>
-                    <p className="text-slate-500 text-xs">
-                      {a.student?.phone}
-                    </p>
-                  </div>
+          {/* Divider if both exist */}
+          {arrivedStudents.length > 0 && filteredWaiting.length > 0 && (
+            <div className="h-px bg-slate-700/50 my-4" />
+          )}
 
-                  {/* Time */}
-                  <span className="text-xs text-slate-400 font-mono flex-shrink-0">
-                    {new Date(a.time).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </span>
-                </div>
-              ))}
+          {/* Waiting Students (Bottom) */}
+          {filteredWaiting.map((student) => (
+            <WaitingCard
+              key={student.id}
+              student={student}
+              onCheckIn={handleCheckIn}
+            />
+          ))}
+
+          {/* Empty State */}
+          {arrivedStudents.length === 0 && filteredWaiting.length === 0 && (
+            <div className="text-center py-8 text-slate-500 text-sm glass-card">
+              {waitingStudents.length === 0
+                ? "🎉 Everyone's here!"
+                : "No matching students found."}
             </div>
           )}
-        </section>
+        </div>
       </main>
 
       {/* ── Bottom Action Bar ── */}

@@ -77,3 +77,50 @@ export function setAdminAuthenticated(value: boolean): void {
     sessionStorage.removeItem(AUTH_KEY);
   }
 }
+
+// ─── Practice Schedule Persistence ───────────────────────────────────────────
+
+export interface PracticeSlot {
+  studentId: string;
+  order: number;
+  name: string;
+  durationMin: number;
+  startTime: string; // ISO timestamp
+  endTime: string; // ISO timestamp
+  done: boolean;
+  actualEndTime?: string; // ISO timestamp when actually marked done
+}
+
+export interface PracticeSchedule {
+  totalMinutes: number;
+  generatedAt: string; // ISO timestamp
+  slots: PracticeSlot[];
+  activeIndex: number; // which slot is currently active (-1 = not started)
+  timerEndTime: string | null; // ISO timestamp when current countdown ends (null = not running)
+}
+
+const PRACTICE_KEY = "rollcall_practice";
+
+function practiceFullKey(): string {
+  return `${PRACTICE_KEY}_${getTodayKey()}`;
+}
+
+export function getPracticeSchedule(): PracticeSchedule | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(practiceFullKey());
+    return raw ? (JSON.parse(raw) as PracticeSchedule) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function savePracticeSchedule(schedule: PracticeSchedule): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(practiceFullKey(), JSON.stringify(schedule));
+}
+
+export function clearPracticeSchedule(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(practiceFullKey());
+}
