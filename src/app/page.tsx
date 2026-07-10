@@ -51,8 +51,6 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             <input
               id="pin-input"
               type="password"
-              inputMode="numeric"
-              maxLength={8}
               autoFocus
               value={pin}
               onChange={(e) => setPin(e.target.value)}
@@ -370,8 +368,6 @@ function Dashboard() {
               <input
                 id="reset-pin-input"
                 type="password"
-                inputMode="numeric"
-                maxLength={8}
                 autoFocus
                 value={resetPin}
                 onChange={(e) => setResetPin(e.target.value)}
