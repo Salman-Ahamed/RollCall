@@ -436,7 +436,7 @@ function WaitingCard({
     >
       {/* Avatar */}
       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-sm font-bold text-slate-300 shadow-inner">
-        {student.name.charAt(0)}
+        {student.id}
       </div>
 
       {/* Info */}
