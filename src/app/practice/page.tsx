@@ -56,7 +56,7 @@ function buildSchedule(totalMinutes: number): PracticeSchedule | null {
     totalMinutes,
     generatedAt: now.toISOString(),
     slots,
-    activeIndex: -1,
+    activeIndex: 0,
     timerEndTime: null,
   };
 }
@@ -183,7 +183,7 @@ export default function PracticePage() {
   );
 
   const handleMarkDone = useCallback(
-    (index: number, isEarly: boolean = false) => {
+    (index: number, isEarly: boolean = false, practicedSeconds?: number) => {
       if (!schedule) return;
       // Stop timer if marking the active one done
       if (timerRef.current && index === schedule.activeIndex) {
@@ -193,7 +193,7 @@ export default function PracticePage() {
 
       const now = new Date();
       const newSlots = schedule.slots.map((s, i) =>
-        i === index ? { ...s, done: true, actualEndTime: now.toISOString() } : s
+        i === index ? { ...s, done: true, actualEndTime: now.toISOString(), actualPracticedSeconds: practicedSeconds } : s
       );
 
       // Recalculate remaining slots' times starting from now ONLY if marking done early from the active slot
@@ -240,11 +240,23 @@ export default function PracticePage() {
     [schedule]
   );
 
+  // ── Auto-advance when timer finishes ──
+  useEffect(() => {
+    if (timerDone && schedule && schedule.activeIndex >= 0 && schedule.activeIndex < schedule.slots.length) {
+      const slot = schedule.slots[schedule.activeIndex];
+      if (!slot.done) {
+        // Passing full duration because time ran out naturally
+        handleMarkDone(schedule.activeIndex, true, Math.round(slot.durationMin * 60));
+      }
+    }
+  }, [timerDone, schedule, handleMarkDone]);
+
   const handleUndoRow = useCallback((index: number) => {
     if (!schedule) return;
     const newSlots = [...schedule.slots];
     newSlots[index] = { ...newSlots[index], done: false };
     delete newSlots[index].actualEndTime;
+    delete newSlots[index].actualPracticedSeconds;
     
     // Auto-revert activeIndex to this index if it's earlier than the current activeIndex
     let nextActive = schedule.activeIndex;
@@ -462,33 +474,38 @@ export default function PracticePage() {
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-3 justify-center">
+              <div className="flex justify-center gap-3">
                 {!isTimerRunning && !timerDone && (
                   <button
-                    id="start-timer-btn"
+                    id="start-hero-btn"
                     onClick={() => handleStart(schedule!.activeIndex)}
-                    className="btn bg-purple-500 hover:bg-purple-600 text-white focus:ring-purple-500 shadow-lg shadow-purple-500/20 px-8 py-4 text-lg font-bold gap-2"
+                    className="btn btn-green px-8 py-4 text-lg font-bold gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Start
                   </button>
                 )}
+
                 {(isTimerRunning || timerDone) && (
                   <button
                     id="done-early-hero-btn"
-                    onClick={() => handleMarkDone(schedule!.activeIndex, true)}
+                    onClick={() => {
+                      const elapsed = Math.round(activeSlot.durationMin * 60) - (countdown > 0 ? countdown : 0);
+                      handleMarkDone(schedule!.activeIndex, true, elapsed);
+                    }}
                     className={`btn px-8 py-4 text-lg font-bold gap-2 ${
                       timerDone
                         ? "bg-emerald-500 hover:bg-emerald-600 text-white focus:ring-emerald-500 shadow-lg shadow-emerald-500/20"
                         : "bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500 shadow-lg shadow-amber-500/20"
                     }`}
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    {timerDone ? "Next →" : "Done Early"}
+                    {timerDone ? "Next" : "Stop / End"}
                   </button>
                 )}
               </div>
@@ -571,7 +588,11 @@ export default function PracticePage() {
                       <p className="text-slate-500 text-xs font-mono">
                         {isDone && slot.actualEndTime ? (
                           <span className="text-emerald-400/80">
-                            Done at {formatTime(slot.actualEndTime)}
+                            {slot.actualPracticedSeconds !== undefined ? (
+                              `Practiced ${Math.floor(slot.actualPracticedSeconds / 60)}m ${slot.actualPracticedSeconds % 60}s`
+                            ) : (
+                              `Done at ${formatTime(slot.actualEndTime)}`
+                            )}
                           </span>
                         ) : (
                           `${formatTime(slot.startTime)} – ${formatTime(slot.endTime)}`

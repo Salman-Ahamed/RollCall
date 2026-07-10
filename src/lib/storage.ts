@@ -89,6 +89,7 @@ export interface PracticeSlot {
   endTime: string; // ISO timestamp
   done: boolean;
   actualEndTime?: string; // ISO timestamp when actually marked done
+  actualPracticedSeconds?: number; // Exact seconds practiced
 }
 
 export interface PracticeSchedule {
