@@ -30,16 +30,50 @@ function formatCountdown(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function getDefaultTimes() {
+  const now = new Date();
+  let m = now.getMinutes();
+  const remainder = m % 5;
+  if (remainder !== 0) {
+    m += (5 - remainder);
+  }
+  now.setMinutes(m);
+  const startHours = String(now.getHours()).padStart(2, '0');
+  const startMins = String(now.getMinutes()).padStart(2, '0');
+  const startStr = `${startHours}:${startMins}`;
+
+  now.setHours(now.getHours() + 1);
+  const endHours = String(now.getHours()).padStart(2, '0');
+  const endMins = String(now.getMinutes()).padStart(2, '0');
+  const endStr = `${endHours}:${endMins}`;
+
+  return { startStr, endStr };
+}
+
+function getMinutesDiff(start: string, end: string) {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  let diff = (eh * 60 + em) - (sh * 60 + sm);
+  if (diff < 0) diff += 24 * 60; // handles midnight crossover
+  return diff;
+}
+
 /** Build a schedule from arrived students, starting "now". */
-function buildSchedule(totalMinutes: number): PracticeSchedule | null {
+/** Build a schedule from arrived students, starting exactly at startTimeStr */
+function buildSchedule(totalMinutes: number, startTimeStr: string): PracticeSchedule | null {
   const checkIns = getCheckIns();
   if (checkIns.length === 0) return null;
 
   const perStudent = totalMinutes / checkIns.length;
+  
   const now = new Date();
+  const [sh, sm] = startTimeStr.split(":").map(Number);
+  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), sh, sm, 0, 0);
+
   const slots: PracticeSlot[] = checkIns.map((ci, i) => {
     const student = STUDENTS.find((s) => s.id === ci.studentId);
-    const start = new Date(now.getTime() + i * perStudent * 60_000);
+    const start = new Date(startDate.getTime() + i * perStudent * 60_000);
     const end = new Date(start.getTime() + perStudent * 60_000);
     return {
       studentId: ci.studentId,
@@ -89,7 +123,8 @@ export default function PracticePage() {
   const [mounted, setMounted] = useState(false);
   const [authed, setAuthed] = useState(false);
   const [schedule, setSchedule] = useState<PracticeSchedule | null>(null);
-  const [timeInput, setTimeInput] = useState("");
+  const [startTimeInput, setStartTimeInput] = useState("");
+  const [endTimeInput, setEndTimeInput] = useState("");
   const [countdown, setCountdown] = useState<number>(-1); // seconds remaining
   const [timerDone, setTimerDone] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -99,9 +134,11 @@ export default function PracticePage() {
   useEffect(() => {
     setAuthed(isAdminAuthenticated());
     const saved = getPracticeSchedule();
+    const { startStr, endStr } = getDefaultTimes();
     if (saved) {
       setSchedule(saved);
-      setTimeInput(String(saved.totalMinutes));
+      setStartTimeInput(startStr);
+      setEndTimeInput(endStr);
       // Restore running timer if there was one
       if (saved.timerEndTime) {
         const remaining = Math.ceil(
@@ -115,6 +152,9 @@ export default function PracticePage() {
           setCountdown(0);
         }
       }
+    } else {
+      setStartTimeInput(startStr);
+      setEndTimeInput(endStr);
     }
     setMounted(true);
   }, []);
@@ -152,15 +192,15 @@ export default function PracticePage() {
   // ── Actions ──
 
   const handleGenerate = useCallback(() => {
-    const mins = parseFloat(timeInput);
-    if (isNaN(mins) || mins <= 0) return;
-    const s = buildSchedule(mins);
+    const mins = getMinutesDiff(startTimeInput, endTimeInput);
+    if (mins <= 0) return;
+    const s = buildSchedule(mins, startTimeInput);
     if (!s) return;
     setSchedule(s);
     setCountdown(-1);
     setTimerDone(false);
     if (timerRef.current) clearInterval(timerRef.current);
-  }, [timeInput]);
+  }, [startTimeInput, endTimeInput]);
 
   const handleStart = useCallback(
     (index: number) => {
@@ -269,15 +309,15 @@ export default function PracticePage() {
   }, [schedule]);
 
   const handleRecalculate = useCallback(() => {
-    const mins = parseFloat(timeInput);
-    if (isNaN(mins) || mins <= 0) return;
+    const mins = getMinutesDiff(startTimeInput, endTimeInput);
+    if (mins <= 0) return;
     if (timerRef.current) clearInterval(timerRef.current);
-    const s = buildSchedule(mins);
+    const s = buildSchedule(mins, startTimeInput);
     if (!s) return;
     setSchedule(s);
     setCountdown(-1);
     setTimerDone(false);
-  }, [timeInput]);
+  }, [startTimeInput, endTimeInput]);
 
   const handleClearSchedule = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -383,38 +423,54 @@ export default function PracticePage() {
         {/* ── Time Input + Generate ── */}
         <section className="glass-card p-5 animate-fade-in">
           <label
-            htmlFor="total-time-input"
             className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 block"
           >
-            Total Practice Time
+            Class Schedule
           </label>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl blur-xl group-focus-within:bg-purple-500/20 transition-all duration-300" />
-              <input
-                id="total-time-input"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                placeholder="e.g. 60"
-                value={timeInput}
-                onChange={(e) => setTimeInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                className="w-full px-4 py-4 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xl font-semibold placeholder:text-slate-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all pr-16 relative z-10"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold tracking-wide z-10">
-                MIN
-              </span>
+          <div className="flex flex-col sm:flex-row gap-3 items-end">
+            <div className="flex-1 flex gap-3 w-full">
+              <div className="relative flex-1 group">
+                <label className="text-xs text-slate-500 mb-1.5 block">Start Time</label>
+                <div className="absolute inset-0 top-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl blur-xl group-focus-within:bg-purple-500/20 transition-all duration-300" />
+                <input
+                  type="time"
+                  value={startTimeInput}
+                  onChange={(e) => setStartTimeInput(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-lg font-semibold focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all relative z-10 [color-scheme:dark]"
+                />
+              </div>
+              <div className="relative flex-1 group">
+                <label className="text-xs text-slate-500 mb-1.5 block">End Time</label>
+                <div className="absolute inset-0 top-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl blur-xl group-focus-within:bg-purple-500/20 transition-all duration-300" />
+                <input
+                  type="time"
+                  value={endTimeInput}
+                  onChange={(e) => setEndTimeInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-lg font-semibold focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all relative z-10 [color-scheme:dark]"
+                />
+              </div>
             </div>
+            
             <button
               id="generate-btn"
               onClick={schedule ? handleRecalculate : handleGenerate}
-              disabled={!timeInput || parseFloat(timeInput) <= 0 || arrivedCount === 0}
-              className="btn bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] px-8 py-4 sm:py-0 text-base font-bold disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 whitespace-nowrap z-10"
+              disabled={getMinutesDiff(startTimeInput, endTimeInput) <= 0 || arrivedCount === 0}
+              className="btn h-[52px] bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] px-8 text-base font-bold disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap z-10 w-full sm:w-auto"
             >
               {schedule ? "Recalculate" : "Generate"}
             </button>
           </div>
+
+          {/* Display total minutes dynamic badge */}
+          {getMinutesDiff(startTimeInput, endTimeInput) > 0 && (
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Total Time: {getMinutesDiff(startTimeInput, endTimeInput)} mins
+            </div>
+          )}
           {arrivedCount === 0 && (
             <p className="text-amber-400/80 text-xs mt-2 flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
