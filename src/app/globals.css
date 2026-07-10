@@ -3,24 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e293b;
-  --bg-input: #334155;
-  --text-primary: #f1f5f9;
+  --bg-primary: #020617; /* Slate 950 */
+  --bg-secondary: #0f172a; /* Slate 900 */
+  --bg-card: rgba(15, 23, 42, 0.6);
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-green: #22c55e;
-  --accent-green-hover: #16a34a;
-  --accent-blue: #3b82f6;
-  --accent-blue-hover: #2563eb;
-  --accent-red: #ef4444;
-  --accent-red-hover: #dc2626;
-  --accent-amber: #f59e0b;
-  --accent-amber-hover: #d97706;
-  --accent-purple: #8b5cf6;
-  --border-color: #334155;
-  --ring-color: #3b82f6;
+  
+  /* Accent colors */
+  --accent-emerald: 16, 185, 129; /* rgb for opacity manipulation */
+  --accent-blue: 59, 130, 246;
+  --accent-purple: 139, 92, 246;
+  --accent-amber: 245, 158, 11;
+  --accent-red: 239, 68, 68;
 }
 
 * {
@@ -33,6 +27,20 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  /* Ambient Mesh Background */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(var(--accent-purple), 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(var(--accent-blue), 0.15), transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(var(--accent-emerald), 0.1), transparent 25%);
+  background-attachment: fixed;
+  background-size: cover;
+  animation: ambient-drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-drift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
 /* Smooth scrollbar */
@@ -40,20 +48,25 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInRight {
@@ -61,9 +74,9 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes pulse-green {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(var(--accent-emerald), 0.4); }
+  50% { box-shadow: 0 0 30px rgba(var(--accent-emerald), 0.8); }
 }
 
 @keyframes shake {
@@ -75,47 +88,103 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slide-in {
-  animation: slideInRight 0.35s ease-out forwards;
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-shake {
   animation: shake 0.4s ease-out;
 }
 
-/* Glassmorphism card */
-.glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 16px;
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
 }
 
-/* Button base */
+/* Premium Glassmorphism */
+.glass-card {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-panel {
+  background: rgba(2, 6, 23, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Base Buttons */
 .btn {
-  @apply inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900;
+  @apply inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 active:scale-95 focus:outline-none relative overflow-hidden;
+  border: 1px solid transparent;
+}
+
+/* Glow effects on buttons */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
 .btn-green {
-  @apply bg-emerald-500 hover:bg-emerald-600 text-white focus:ring-emerald-500 shadow-lg shadow-emerald-500/20;
+  background: linear-gradient(135deg, rgb(var(--accent-emerald)), #059669);
+  color: white;
+  box-shadow: 0 4px 15px rgba(var(--accent-emerald), 0.3);
+}
+.btn-green:hover {
+  box-shadow: 0 6px 20px rgba(var(--accent-emerald), 0.5);
+  transform: translateY(-1px);
 }
 
 .btn-red {
-  @apply bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 shadow-lg shadow-red-500/20;
+  background: linear-gradient(135deg, rgb(var(--accent-red)), #b91c1c);
+  color: white;
+  box-shadow: 0 4px 15px rgba(var(--accent-red), 0.3);
+}
+.btn-red:hover {
+  box-shadow: 0 6px 20px rgba(var(--accent-red), 0.5);
+  transform: translateY(-1px);
 }
 
 .btn-blue {
-  @apply bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-500 shadow-lg shadow-blue-500/20;
+  background: linear-gradient(135deg, rgb(var(--accent-blue)), #2563eb);
+  color: white;
+  box-shadow: 0 4px 15px rgba(var(--accent-blue), 0.3);
 }
-
-.btn-amber {
-  @apply bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500 shadow-lg shadow-amber-500/20;
+.btn-blue:hover {
+  box-shadow: 0 6px 20px rgba(var(--accent-blue), 0.5);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
-  @apply bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white focus:ring-slate-500;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.1);
 }

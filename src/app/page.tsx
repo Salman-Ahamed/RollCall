@@ -180,18 +180,18 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700/50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      {/* Floating Header */}
+      <header className="sticky top-4 z-40 px-4">
+        <div className="max-w-2xl mx-auto glass-panel px-4 py-3 rounded-2xl flex items-center justify-between shadow-lg shadow-black/20">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white leading-none">RollCall</h1>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h1 className="text-lg font-bold text-white leading-tight tracking-tight">RollCall</h1>
+              <p className="text-xs text-slate-400 font-medium">
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "short",
                   month: "short",
@@ -202,19 +202,18 @@ function Dashboard() {
           </div>
 
           {/* Stats pill + Practice link */}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              {checkIns.length}
-            </span>
-            <span className="text-slate-500">/</span>
-            <span className="text-slate-400 font-medium">{STUDENTS.length}</span>
+          <div className="flex items-center gap-2.5 text-sm">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+              <span className="text-white font-bold">{checkIns.length}</span>
+              <span className="text-slate-500 font-medium">/ {STUDENTS.length}</span>
+            </div>
 
             <Link
               href="/practice"
-              className="btn ml-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 transition-colors gap-1"
+              className="btn px-3 py-2 text-xs font-bold rounded-xl bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 hover:text-white transition-all shadow-lg shadow-purple-500/10 gap-1.5 border border-purple-500/20"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Practice
@@ -225,8 +224,9 @@ function Dashboard() {
 
       <main className="max-w-2xl mx-auto px-4 py-5 space-y-4 pb-28">
         {/* Search */}
-        <div className="relative mb-2 animate-fade-in">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="relative mb-6 animate-fade-in group mt-2">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur-xl group-focus-within:bg-blue-500/20 transition-all duration-300" />
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-400 transition-colors z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -235,14 +235,14 @@ function Dashboard() {
             placeholder="Search by name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm"
+            className="w-full pl-12 pr-4 py-4 rounded-2xl glass-card text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-base relative z-0"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors z-10 bg-slate-800 p-1 rounded-full"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -259,28 +259,31 @@ function Dashboard() {
               style={{ animationDelay: `${Math.min(i, 10) * 0.03}s` }}
             >
               {/* Order badge */}
-              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm font-bold">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shadow-inner">
                 {a.order}
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm truncate">
+                <p className="text-white font-semibold text-base truncate">
                   {a.student?.name ?? "Unknown"}
                 </p>
-                <p className="text-slate-500 text-xs">
+                <p className="text-slate-400 text-xs font-medium mt-0.5">
                   {a.student?.phone}
                 </p>
               </div>
 
               {/* Time */}
-              <span className="text-xs text-emerald-400/80 font-mono flex-shrink-0">
-                {new Date(a.time).toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </span>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Arrived</span>
+                <span className="text-xs text-emerald-400/90 font-mono font-medium flex-shrink-0 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/10">
+                  {new Date(a.time).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </span>
+              </div>
             </div>
           ))}
 
@@ -309,15 +312,15 @@ function Dashboard() {
         </div>
       </main>
 
-      {/* ── Bottom Action Bar ── */}
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-slate-900/90 backdrop-blur-lg border-t border-slate-700/50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-2">
+      {/* ── Bottom Floating Dock ── */}
+      <div className="fixed bottom-6 inset-x-0 z-30 px-4">
+        <div className="max-w-md mx-auto glass-panel rounded-2xl px-3 py-3 flex items-center justify-between gap-3 shadow-2xl shadow-black/40 border border-white/10">
           {/* Undo */}
           <button
             id="undo-btn"
             onClick={handleUndo}
             disabled={checkIns.length === 0}
-            className="btn btn-ghost px-3 py-2.5 text-sm gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="btn btn-ghost flex-1 py-3 text-sm gap-2 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
             title="Undo last check-in"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -331,7 +334,7 @@ function Dashboard() {
             id="export-btn"
             onClick={handleExportCSV}
             disabled={checkIns.length === 0}
-            className="btn btn-blue px-3 py-2.5 text-sm gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="btn btn-blue flex-1 py-3 text-sm gap-2 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -339,13 +342,11 @@ function Dashboard() {
             Export
           </button>
 
-          <div className="flex-1" />
-
           {/* Reset */}
           <button
             id="reset-btn"
             onClick={() => setShowResetDialog(true)}
-            className="btn btn-red px-3 py-2.5 text-sm gap-1.5"
+            className="btn btn-red flex-1 py-3 text-sm gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -429,19 +430,19 @@ function WaitingCard({
 
   return (
     <div
-      className={`glass-card px-4 py-3 flex items-center gap-3 transition-all duration-200 ${
-        justCheckedIn ? "opacity-0 scale-95" : ""
+      className={`glass-card px-4 py-3 flex items-center gap-3 transition-all duration-300 ${
+        justCheckedIn ? "opacity-0 scale-95 translate-y-2" : "hover:scale-[1.01]"
       }`}
     >
       {/* Avatar */}
-      <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-300">
+      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-sm font-bold text-slate-300 shadow-inner">
         {student.name.charAt(0)}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-white font-medium text-sm truncate">{student.name}</p>
-        <p className="text-slate-500 text-xs">{student.phone}</p>
+        <p className="text-white font-semibold text-base truncate">{student.name}</p>
+        <p className="text-slate-400 text-xs font-medium mt-0.5">{student.phone}</p>
       </div>
 
       {/* Check-in button */}
@@ -449,7 +450,7 @@ function WaitingCard({
         id={`checkin-${student.id}`}
         onClick={handleClick}
         disabled={justCheckedIn}
-        className="btn btn-green px-5 py-2.5 text-sm font-bold tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn btn-green px-6 py-2.5 text-sm font-bold tracking-wider disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]"
       >
         IN
       </button>

@@ -329,25 +329,25 @@ export default function PracticePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700/50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      {/* Floating Header */}
+      <header className="sticky top-4 z-40 px-4">
+        <div className="max-w-2xl mx-auto glass-panel px-4 py-3 rounded-2xl flex items-center justify-between shadow-lg shadow-black/20">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 flex items-center justify-center transition-colors border border-slate-700/50 shadow-inner"
               title="Back to RollCall"
             >
-              <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-white leading-none flex items-center gap-2">
+              <h1 className="text-lg font-bold text-white leading-tight tracking-tight flex items-center gap-2">
                 <span className="text-purple-400">Practice</span>
                 Schedule
               </h1>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 font-medium">
                 {schedule ? `${doneCount} of ${arrivedCount} completed` : `${arrivedCount} students present`}
               </p>
             </div>
@@ -356,7 +356,7 @@ export default function PracticePage() {
           {schedule && (
             <button
               onClick={handleClearSchedule}
-              className="btn btn-ghost px-3 py-1.5 text-xs gap-1"
+              className="btn bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-3 py-2 text-xs font-bold rounded-xl transition-all shadow-sm gap-1"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -376,8 +376,9 @@ export default function PracticePage() {
           >
             Total Practice Time
           </label>
-          <div className="flex gap-3">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl blur-xl group-focus-within:bg-purple-500/20 transition-all duration-300" />
               <input
                 id="total-time-input"
                 type="number"
@@ -387,17 +388,17 @@ export default function PracticePage() {
                 value={timeInput}
                 onChange={(e) => setTimeInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                className="w-full px-4 py-3.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-lg font-medium placeholder:text-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors pr-16"
+                className="w-full px-4 py-4 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-xl font-semibold placeholder:text-slate-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all pr-16 relative z-10"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">
-                min
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold tracking-wide z-10">
+                MIN
               </span>
             </div>
             <button
               id="generate-btn"
               onClick={schedule ? handleRecalculate : handleGenerate}
               disabled={!timeInput || parseFloat(timeInput) <= 0 || arrivedCount === 0}
-              className="btn bg-purple-500 hover:bg-purple-600 text-white focus:ring-purple-500 shadow-lg shadow-purple-500/20 px-5 py-3.5 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 whitespace-nowrap"
+              className="btn bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] px-8 py-4 sm:py-0 text-base font-bold disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 whitespace-nowrap z-10"
             >
               {schedule ? "Recalculate" : "Generate"}
             </button>
@@ -421,24 +422,31 @@ export default function PracticePage() {
         {/* ── Active Turn Hero Card ── */}
         {activeSlot && (
           <section
-            className={`rounded-2xl p-6 animate-fade-in transition-all duration-500 ${
+            className={`rounded-[2rem] p-8 sm:p-10 animate-scale-in transition-all duration-500 relative overflow-hidden ${
               timerDone
-                ? "bg-gradient-to-br from-amber-500/20 to-red-500/20 border-2 border-amber-500/50"
+                ? "bg-gradient-to-br from-amber-500/20 to-red-600/20 border border-amber-500/50 shadow-[0_0_50px_rgba(245,158,11,0.15)]"
                 : isTimerRunning
-                ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-2 border-purple-500/40"
-                : "bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-700"
+                ? "bg-gradient-to-br from-purple-500/20 to-blue-600/20 border border-purple-500/40 shadow-[0_0_50px_rgba(168,85,247,0.2)]"
+                : "glass-card border border-white/5 shadow-2xl shadow-black/50"
             }`}
           >
-            <div className="text-center">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">
+            {/* Ambient inner glow for active state */}
+            {(isTimerRunning || timerDone) && (
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-3xl mix-blend-overlay pointer-events-none" />
+            )}
+            
+            <div className="text-center relative z-10">
+              <p className="text-xs font-bold text-slate-400/80 uppercase tracking-[0.2em] mb-3">
                 {timerDone ? "⏰ Time's Up!" : isTimerRunning ? "Now Practicing" : "Up Next"}
               </p>
-              <p className="text-3xl sm:text-4xl font-extrabold text-white mb-1 tracking-tight">
+              <p className="text-4xl sm:text-5xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
                 {activeSlot.name}
               </p>
-              <p className="text-slate-400 text-sm mb-4">
-                #{activeSlot.order} · {activeSlot.durationMin.toFixed(1)} min
-              </p>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/20 text-slate-300 text-sm font-medium mb-6 border border-white/5">
+                <span className="text-emerald-400">#{activeSlot.order}</span>
+                <span>•</span>
+                <span>{activeSlot.durationMin.toFixed(1)} min</span>
+              </div>
 
               {/* Countdown display */}
               <div className={`text-6xl sm:text-7xl font-mono font-black mb-5 transition-colors ${
